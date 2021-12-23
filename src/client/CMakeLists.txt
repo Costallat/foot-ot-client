@@ -106,6 +106,6 @@ set(client_SOURCES ${client_SOURCES}
 )
 
 if(NOT MSVC)
-    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/luafunctions.cpp
+    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/lua/luafunctions.cpp
                                 PROPERTIES LANGUAGE CXX COMPILE_FLAGS "-g0 -Os")
 endif()

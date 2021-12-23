@@ -1,0 +1,80 @@
+---
+name: Analysis - CodeQL
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - dev
+      - devel
+      - develop
+
+env:
+  VCPKG_BUILD_TYPE: release
+  CMAKE_BUILD_PARALLEL_LEVEL: 2
+  MAKEFLAGS: '-j 2'
+  NODE_OPTIONS: ' --max-old-space-size=8192 '
+
+jobs:
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['cpp', 'python']
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Install Linux Dependencies
+        if: ${{ matrix.language == 'cpp' }}
+        run: >
+          sudo apt-get update && sudo apt-get install ccache build-essential
+          libluajit-5.1-dev liblua5.1-0 liblua5.1-0-dev libglfw3-dev
+          libgl1-mesa-dev libglu1-mesa-dev libgl1-mesa-dev libegl1-mesa-dev zip
+
+      - name: CCache
+        id: ccache
+        uses: actions/cache@v2
+        with:
+          path: /home/runner/.ccache
+          key: ccache-${{ runner.os }}-RelWithDebInfo-${{ hashFiles('**/src') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-RelWithDebInfo-
+            ccache-${{ runner.os }}-
+
+      - name: Restore artifacts, or setup vcpkg (do not install any package)
+        if: ${{ matrix.language == 'cpp' }}
+        uses: lukka/run-vcpkg@v7
+        with:
+          setupOnly: true
+          vcpkgDirectory: ${{ github.workspace }}/vcpkg
+          appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
+          vcpkgTriplet: x64-linux
+          additionalCachedPaths: ${{ github.workspace }}/build/vcpkg_installed
+          vcpkgGitCommitId: 86d689b2305d8c453418cae1ed2009718d05cddf
+
+      - name: Get latest CMake and ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Run CMake
+        if: ${{ matrix.language == 'cpp' }}
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          useVcpkgToolchainFile: true
+          buildDirectory: ${{ github.workspace }}/build/
+          cmakeBuildType: RelWithDebInfo
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1

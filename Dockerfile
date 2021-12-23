@@ -1,5 +1,6 @@
-FROM ubuntu@sha256:b88f8848e9a1a4e4558ba7cfc4acc5879e1d0e7ac06401409062ad2627e6fb58 AS builder
+FROM ubuntu:20.04 AS builder
 
+<<<<<<< HEAD
 RUN apt-get update; \
   apt-get install -y \
     build-essential \
@@ -26,19 +27,56 @@ WORKDIR /physfs/build/
 RUN cmake ..
 RUN make -j$(nproc)
 RUN make install
+=======
+RUN export DEBIAN_FRONTEND=noninteractive \
+	&& ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 
-COPY ./src/ /otclient/src/.
-COPY CMakeLists.txt /otclient/.
+RUN apt-get update && apt-get install -y \
+	build-essential \
+	cmake \
+	curl \
+	git \
+	libglew-dev \
+	liblua5.1-0-dev \
+	libluajit-5.1-dev \
+	libncurses5-dev \
+	libopenal-dev \
+	libssl-dev \
+	libvorbis-dev \
+	mercurial \
+	tar \
+	unzip \
+	zip \
+	zlib1g-dev \
+	&& dpkg-reconfigure --frontend noninteractive tzdata \
+	&& apt-get clean && apt-get autoclean
+
+WORKDIR /opt
+RUN git clone https://github.com/microsoft/vcpkg
+RUN ./vcpkg/bootstrap-vcpkg.sh
+
+WORKDIR /opt/vcpkg
+COPY vcpkg.json /opt/vcpkg/
+RUN /opt/vcpkg/vcpkg --feature-flags=binarycaching,manifests,versions install
+
+COPY ./ /otclient/
+
+RUN apt-get install -y libluajit-5.1-dev
+>>>>>>> 4a2b0f4b... Sync with current client
+
 WORKDIR /otclient/build/
-RUN cmake -DCMAKE_CXX_LINK_FLAGS=-no-pie -DCMAKE_BUILD_TYPE=Release ..
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake ..
 RUN make -j$(nproc)
 
-FROM ubuntu@sha256:b88f8848e9a1a4e4558ba7cfc4acc5879e1d0e7ac06401409062ad2627e6fb58
+FROM ubuntu:20.04
+
 RUN apt-get update; \
-  apt-get install -y \
-    libglew2.0 \
-    libopenal1; \
-  apt-get clean && apt-get autoclean
+	apt-get install -y \
+	libglew2.1 \
+	libopenal1 \
+	libopengl0 \
+	&& apt-get clean && apt-get autoclean
+
 COPY --from=builder /otclient/build/otclient /otclient/bin/otclient
 COPY ./data/ /otclient/data/.
 COPY ./mods/ /otclient/mods/.

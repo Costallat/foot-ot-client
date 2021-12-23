@@ -128,13 +128,13 @@ set(framework_SOURCES ${framework_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/platform/platform.h
 )
 
+
 if(NOT MSVC)
-    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/luafunctions.cpp
-                                PROPERTIES LANGUAGE CXX COMPILE_FLAGS "-g0 -Os")
+set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/luafunctions.cpp
+            PROPERTIES LANGUAGE CXX COMPILE_FLAGS "-g0 -Os")
 endif()
 
 # some build options
-option(LUAJIT "Use lua jit" OFF)
 option(USE_STATIC_LIBS "Don't use shared libraries (dlls)" ON)
 if(NOT APPLE)
     option(CRASH_HANDLER "Generate crash reports" ON)
@@ -152,15 +152,15 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
-set(COMPILER_CXX_EXTRA_FLAGS       "-Wall -Wextra -Wno-unused -Wno-unused-parameter -Wno-unused-result -pipe")
-set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+set(COMPILER_CXX_EXTRA_FLAGS "-Wall -Wextra -Wno-unused -Wno-unused-parameter -Wno-unused-result -pipe")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O1 -g -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELEASE        "-O2")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 if (WIN32 AND MSVC)
-    set(COMPILER_CXX_EXTRA_FLAGS       "/bigobj")
-    set(CMAKE_CXX_FLAGS_DEBUG          "/Od /DEBUG:FULL")
+    set(COMPILER_CXX_EXTRA_FLAGS "/bigobj")
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /DEBUG:FULL")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O12 /DEBUG:FASTLINK")
-    set(CMAKE_CXX_FLAGS_RELEASE        "/Ot")
+    set(CMAKE_CXX_FLAGS_RELEASE "/Ot")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_CXX_EXTRA_FLAGS} ${ARCH_FLAGS} ${CPP2011_FLAGS}")
@@ -202,32 +202,27 @@ set(Boost_USE_STATIC_LIBS ${USE_STATIC_LIBS})
 find_package(Boost 1.48.0 COMPONENTS ${REQUIRED_BOOST_COMPONENTS} REQUIRED)
 
 #find lua
-if(LUAJIT)
-    find_package(LuaJIT REQUIRED)
-    set(LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
-    set(LUA_LIBRARY ${LUAJIT_LIBRARY})
+find_package(LuaJIT REQUIRED)
+set(LUAJIT_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
+set(LUAJIT_LIBRARY ${LUAJIT_LIBRARY})
 
-    if(APPLE)
-      set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -pagezero_size 10000 -image_base 100000000")
-    endif()
-else()
-    find_package(Lua REQUIRED)
+if(APPLE)
+    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -pagezero_size 10000 -image_base 100000000")
 endif()
-message(STATUS "LuaJIT: " ${LUAJIT})
 
 find_package(PhysFS REQUIRED)
 find_package(ZLIB REQUIRED)
 
 set(framework_LIBRARIES ${framework_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${LUA_LIBRARY}
+    ${LUAJIT_LIBRARY}
     ${PHYSFS_LIBRARY}
     ${ZLIB_LIBRARY}
 )
 
 set(framework_INCLUDE_DIRS ${framework_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
-    ${LUA_INCLUDE_DIR}
+    ${LUAJIT_INCLUDE_DIR}
     ${PHYSFS_INCLUDE_DIR}
     ${framework_INCLUDE_DIRS}
 )
@@ -277,14 +272,14 @@ if(WIN32)
     endif()
 
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -D_WIN32_WINNT=0x0501 -DWIN32)
-    #set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--large-address-aware") # strip all debug information
+    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--large-address-aware") # strip all debug information
     set(SYSTEM_LIBRARIES "")
 else()
     if(APPLE)
         set(framework_DEFINITIONS ${framework_DEFINITIONS} -D_REENTRANT) # enable thread safe code
         set(SYSTEM_LIBRARIES "")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+        # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
         set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -rdynamic -Wl,-rpath,./libs") # rdynamic is needed by backtrace.h used in crash handler
         set(SYSTEM_LIBRARIES dl rt)
     endif()
@@ -343,7 +338,6 @@ if(FRAMEWORK_GRAPHICS)
             set(framework_LIBRARIES ${framework_LIBRARIES} ${DirectX_LIBRARY} ${DirectX_LIBRARIES})
             set(framework_SOURCES ${framework_SOURCES}
                 ${CMAKE_CURRENT_LIST_DIR}/graphics/dx/painterdx9.cpp
-                ${CMAKE_CURRENT_LIST_DIR}/graphics/dx/painterdx9.h
             )
         endif()
 
@@ -461,7 +455,6 @@ if(FRAMEWORK_GRAPHICS)
 else()
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/core/consoleapplication.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/core/consoleapplication.h
     )
 endif()
 
@@ -482,22 +475,13 @@ if(FRAMEWORK_SOUND)
 
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/sound/combinedsoundsource.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/combinedsoundsource.h
-        ${CMAKE_CURRENT_LIST_DIR}/sound/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/oggsoundfile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/oggsoundfile.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundbuffer.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/soundbuffer.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundchannel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/soundchannel.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundfile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/soundfile.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundmanager.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/soundmanager.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundsource.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/soundsource.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/streamsoundsource.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sound/streamsoundsource.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_SOUND)
 endif()
@@ -512,18 +496,11 @@ if(FRAMEWORK_NET)
 
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/net/connection.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/connection.h
-        ${CMAKE_CURRENT_LIST_DIR}/net/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/net/inputmessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/inputmessage.h
         ${CMAKE_CURRENT_LIST_DIR}/net/outputmessage.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/outputmessage.h
         ${CMAKE_CURRENT_LIST_DIR}/net/protocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/protocol.h
         ${CMAKE_CURRENT_LIST_DIR}/net/protocolhttp.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/protocolhttp.h
         ${CMAKE_CURRENT_LIST_DIR}/net/server.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/net/server.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_NET)
 endif()
@@ -531,9 +508,7 @@ endif()
 if(FRAMEWORK_XML)
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxml.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxml.h
         ${CMAKE_CURRENT_LIST_DIR}/xml/tinystr.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinystr.h
         ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlerror.cpp
         ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlparser.cpp
     )
@@ -547,11 +522,8 @@ if(FRAMEWORK_SQL)
     set(framework_LIBRARIES ${MYSQL_LIBRARY} ${framework_LIBRARIES})
 
     set(framework_SOURCES ${framework_SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/sql/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/sql/database.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sql/database.h
         ${CMAKE_CURRENT_LIST_DIR}/sql/mysql.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sql/mysql.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_SQL)
 endif()

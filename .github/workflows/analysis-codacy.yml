@@ -9,6 +9,7 @@ on:
       - dev
       - devel
       - develop
+      - canary-client
 
 jobs:
   codacy:

@@ -9,6 +9,7 @@ on:
       - dev
       - devel
       - develop
+      - canary-client
 
 env:
   VCPKG_BUILD_TYPE: release

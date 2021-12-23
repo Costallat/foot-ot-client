@@ -272,14 +272,14 @@ if(WIN32)
     endif()
 
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -D_WIN32_WINNT=0x0501 -DWIN32)
-    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--large-address-aware") # strip all debug information
+    # set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,--large-address-aware") # strip all debug information
     set(SYSTEM_LIBRARIES "")
 else()
     if(APPLE)
         set(framework_DEFINITIONS ${framework_DEFINITIONS} -D_REENTRANT) # enable thread safe code
         set(SYSTEM_LIBRARIES "")
     else()
-        # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
         set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -rdynamic -Wl,-rpath,./libs") # rdynamic is needed by backtrace.h used in crash handler
         set(SYSTEM_LIBRARIES dl rt)
     endif()
@@ -475,13 +475,22 @@ if(FRAMEWORK_SOUND)
 
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/sound/combinedsoundsource.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/combinedsoundsource.h
+        ${CMAKE_CURRENT_LIST_DIR}/sound/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/oggsoundfile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/oggsoundfile.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundbuffer.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/soundbuffer.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundchannel.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/soundchannel.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundfile.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/soundfile.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundmanager.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/soundmanager.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/soundsource.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/soundsource.h
         ${CMAKE_CURRENT_LIST_DIR}/sound/streamsoundsource.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sound/streamsoundsource.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_SOUND)
 endif()
@@ -496,21 +505,30 @@ if(FRAMEWORK_NET)
 
     set(framework_SOURCES ${framework_SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/net/connection.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/connection.h
+        ${CMAKE_CURRENT_LIST_DIR}/net/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/net/inputmessage.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/inputmessage.h
         ${CMAKE_CURRENT_LIST_DIR}/net/outputmessage.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/outputmessage.h
         ${CMAKE_CURRENT_LIST_DIR}/net/protocol.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/protocol.h
         ${CMAKE_CURRENT_LIST_DIR}/net/protocolhttp.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/protocolhttp.h
         ${CMAKE_CURRENT_LIST_DIR}/net/server.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/net/server.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_NET)
 endif()
 
 if(FRAMEWORK_XML)
     set(framework_SOURCES ${framework_SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxml.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinystr.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlerror.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlparser.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxml.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxml.h
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinystr.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinystr.h
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlerror.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/xml/tinyxmlparser.cpp
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_XML)
 endif()
@@ -522,8 +540,11 @@ if(FRAMEWORK_SQL)
     set(framework_LIBRARIES ${MYSQL_LIBRARY} ${framework_LIBRARIES})
 
     set(framework_SOURCES ${framework_SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/sql/declarations.h
         ${CMAKE_CURRENT_LIST_DIR}/sql/database.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sql/database.h
         ${CMAKE_CURRENT_LIST_DIR}/sql/mysql.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sql/mysql.h
     )
     set(framework_DEFINITIONS ${framework_DEFINITIONS} -DFW_SQL)
 endif()

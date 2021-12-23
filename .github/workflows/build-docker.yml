@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - main
       - dev
       - devel
       - develop
@@ -54,11 +55,14 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: PrepareReg Names
+        run: echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+
       - name: Build
         if: ${{ github.event_name == 'pull_request' }}
         uses: docker/build-push-action@v2
         with:
-          tags: ghcr.io/${{ github.repository }}:${{ steps.gitversion.outputs.semVer }}
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ steps.gitversion.outputs.semVer }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -68,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.gitversion.outputs.semVer }}
+          tags: ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ steps.gitversion.outputs.semVer }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

@@ -1,33 +1,5 @@
 FROM ubuntu:20.04 AS builder
 
-<<<<<<< HEAD
-RUN apt-get update; \
-  apt-get install -y \
-    build-essential \
-    cmake \
-    git-core \
-    libboost-atomic1.65-dev \
-    libboost-chrono1.65-dev \
-    libboost-date-time1.65-dev \
-    libboost-filesystem1.65-dev \
-    libboost-system1.65-dev \
-    libboost-thread1.65-dev \
-    libglew-dev \
-    liblua5.1-0-dev \
-    libncurses5-dev \
-    libopenal-dev \
-    libssl-dev \
-    libvorbis-dev \
-    zlib1g-dev; \
-  apt-get clean && apt-get autoclean
-
-WORKDIR /
-RUN git clone --branch release-3.0.2 --depth 1 https://github.com/icculus/physfs.git
-WORKDIR /physfs/build/
-RUN cmake ..
-RUN make -j$(nproc)
-RUN make install
-=======
 RUN export DEBIAN_FRONTEND=noninteractive \
 	&& ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 
@@ -62,7 +34,6 @@ RUN /opt/vcpkg/vcpkg --feature-flags=binarycaching,manifests,versions install
 COPY ./ /otclient/
 
 RUN apt-get install -y libluajit-5.1-dev
->>>>>>> 4a2b0f4b... Sync with current client
 
 WORKDIR /otclient/build/
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake ..

@@ -82,7 +82,7 @@ jobs:
           build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build/
           sonar-scanner \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.organization=opentibiabr \
+            -Dsonar.organization=costallat \
             -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.cfamily.threads=${NUMBER_OF_PROCESSORS} \
             -Dsonar.cfamily.cache.enabled=true \
@@ -105,7 +105,7 @@ jobs:
           build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build/
           sonar-scanner \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.organization=opentibiabr \
+            -Dsonar.organization=costallat \
             -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.cfamily.threads=${NUMBER_OF_PROCESSORS} \
             -Dsonar.cfamily.cache.enabled=true \
